@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/auth/${api.version}")
+@RequestMapping("/auth/${api.base-version}")
 public class AuthController {
 
     private final ManagerRepository managerRepository;
