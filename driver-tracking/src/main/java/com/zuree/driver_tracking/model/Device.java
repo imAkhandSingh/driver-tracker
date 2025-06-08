@@ -33,7 +33,13 @@ public class Device {
 
     @Override
     public String toString() {
-        return "Device{id=" + deviceId + "}";
+        return "Device{" +
+                "deviceId=" + deviceId +
+                ", deviceName='" + deviceName + '\'' +
+                ", deviceType='" + deviceType + '\'' +
+                ", status='" + status + '\'' +
+                ", installedAt=" + installedAt +
+                '}';
     }
 }
 
