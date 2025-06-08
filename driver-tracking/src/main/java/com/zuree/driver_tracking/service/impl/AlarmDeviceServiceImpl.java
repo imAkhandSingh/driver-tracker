@@ -11,11 +11,11 @@ import com.zuree.driver_tracking.service.AlarmDeviceService;
 import com.zuree.driver_tracking.util.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;

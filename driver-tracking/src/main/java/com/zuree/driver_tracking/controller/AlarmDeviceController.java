@@ -1,13 +1,10 @@
 package com.zuree.driver_tracking.controller;
 
 import com.zuree.driver_tracking.dto.AlarmDTO;
-import com.zuree.driver_tracking.dto.AlarmManagerDTO;
 import com.zuree.driver_tracking.dto.response.ErrorResponse;
 import com.zuree.driver_tracking.dto.response.SuccessResponse;
-import com.zuree.driver_tracking.model.Alarm;
 import com.zuree.driver_tracking.service.AlarmDeviceService;
 import com.zuree.driver_tracking.util.AppConstants;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
