@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.5'
+	id 'org.springframework.boot' version '3.2.5'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -24,6 +24,14 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-dependencies:3.2.5'
+	// OAuth2 Resource Server support (includes JwtDecoder, NimbusJwtDecoder, JwtAuthenticationConverter)
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	// Optional: Explicit Nimbus JOSE JWT (already transitively included)
+	implementation 'com.nimbusds:nimbus-jose-jwt:9.38' // Optional but helpful for direct use
+	// For JWK support or direct JOSE operations
+	implementation 'org.springframework.security:spring-security-oauth2-jose'
+	implementation 'org.modelmapper:modelmapper:3.2.0'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
