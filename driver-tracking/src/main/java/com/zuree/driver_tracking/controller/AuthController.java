@@ -4,11 +4,13 @@ import com.zuree.driver_tracking.dto.ManagerDTO;
 import com.zuree.driver_tracking.model.Manager;
 import com.zuree.driver_tracking.repository.ManagerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 import java.util.Optional;
