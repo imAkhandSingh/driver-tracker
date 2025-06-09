@@ -1,5 +1,6 @@
 package com.zuree.driver_tracking.controller;
 
+import com.zuree.driver_tracking.dto.response.SuccessResponse;
 import com.zuree.driver_tracking.model.Alarm;
 import com.zuree.driver_tracking.model.Device;
 import com.zuree.driver_tracking.repository.AlarmRepository;
@@ -16,7 +17,7 @@ import java.time.ZoneId;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/alarms/${api.version}")
+@RequestMapping("/alarms/${api.base-version}")
 public class AlarmController {
 
     AlarmRepository alarmRepository;
@@ -44,7 +45,7 @@ public class AlarmController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(Map.of("msg", "Alarm successfully added!"));
+                .body(new SuccessResponse<>("Alarm successfully added!"));
 
     }
 }

@@ -3,7 +3,6 @@ package com.zuree.driver_tracking.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
-
 import java.util.List;
 
 @ToString
@@ -11,8 +10,6 @@ import java.util.List;
 @Entity
 @Table(name = "manager")
 public class Manager {
-
-    public Manager() {}
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

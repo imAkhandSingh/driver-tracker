@@ -1,10 +1,12 @@
 package com.zuree.driver_tracking.controller;
+
 import com.zuree.driver_tracking.model.Alarm;
 import com.zuree.driver_tracking.model.Device;
 import com.zuree.driver_tracking.model.Manager;
 import com.zuree.driver_tracking.repository.AlarmRepository;
 import com.zuree.driver_tracking.repository.DeviceRepository;
 import com.zuree.driver_tracking.repository.ManagerRepository;
+import com.zuree.driver_tracking.util.AppConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import com.zuree.driver_tracking.util.AppConstants;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @CrossOrigin(origins = "*")
 @Slf4j
 @RestController
-@RequestMapping("/alarm/${api.version}")
+@RequestMapping("/alarm/${api.base-version}")
 public class ManagerAlarmSseController {
 
     private final Map<Long, List<SseEmitter>> managerEmitters = new ConcurrentHashMap<>();
@@ -59,7 +60,7 @@ public class ManagerAlarmSseController {
         }
     }
 
-    @PostMapping("create")
+    @PostMapping("/create")
     public ResponseEntity<Object> sendAlarmToManager(@RequestBody Map<String, String> body) {
         String alarmType = body.get("alarmType");
         String description = body.get("description");
