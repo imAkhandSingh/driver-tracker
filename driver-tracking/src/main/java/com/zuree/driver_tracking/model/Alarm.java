@@ -22,6 +22,13 @@ public class Alarm {
     private Long alarmId;
 
     private String alarmType;
+    private Double speed;
+    private Double acceleration;
+    private Double latitude;
+    private Double longitude;
+    private Boolean drowsiness;
+    private Boolean rashDriving;
+    private Boolean collision;
     private LocalDateTime alarmTime;
     private String description;
     private Boolean resolved;
@@ -29,6 +36,11 @@ public class Alarm {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id")
     private Device device;
+
+    @OneToOne(mappedBy = "alarm",   // inverse side
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, optional = true)   // optional!
+    private AlarmImage alarmImage;       // may be null
 
     @Override
     public String toString() {

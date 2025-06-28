@@ -98,7 +98,6 @@ public class VehicleServiceImpl implements VehicleService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
         List<Vehicle> vehicleList = vehicleRepository.findByManager(manager.get(), pageable);
-//        return manager.map(value -> toListDTO(value.getVehicles()));
         return Optional.of(toListDTO(vehicleList));
     }
 }

@@ -14,4 +14,5 @@ public interface AlarmDeviceService {
     List<AlarmDTO> toListDTO(List<Alarm> alarms);
     Optional<List<AlarmDTO>> getAllManagerAlarms(Authentication authentication, int page, int size, String sortBy, String direction);
     List<AlarmDTO> toPageDTO(Page<Alarm> alarms);
+    AlarmDTO getAlarmById(Long id);
 }

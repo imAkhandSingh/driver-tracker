@@ -11,8 +11,10 @@ import com.zuree.driver_tracking.repository.DeviceRepository;
 import com.zuree.driver_tracking.repository.ManagerRepository;
 import com.zuree.driver_tracking.service.AlarmSseEmitterService;
 import com.zuree.driver_tracking.util.AppConstants;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -21,11 +23,21 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class AlarmSseEmitterServiceImpl implements AlarmSseEmitterService {
+    @Value("${preview-url}")
+    String previewUrl;
+
+    @Value("${download-url}")
+    String downloadUrl;
+
+    String prevUrl;
+    String downUrl;
+
     private final Map<Long, List<SseEmitter>> managerEmitters = new ConcurrentHashMap<>();
     private final ManagerRepository managerRepository;
     private final DeviceRepository deviceRepository;
@@ -61,11 +73,37 @@ public class AlarmSseEmitterServiceImpl implements AlarmSseEmitterService {
     }
 
     @Override
-    public boolean createAlarm(AlarmRequest request) {
+    public SseEmitter streamAlarmsById(Long mid) {
+//        Long managerId = managerRepository.findById(mid).get().getManagerId();
+        SseEmitter emitter = new SseEmitter(30 * 60 * 1000L); // 30 min
+        managerEmitters.computeIfAbsent(mid, id -> new CopyOnWriteArrayList<>()).add(emitter);
+
+        emitter.onCompletion(() -> managerEmitters.get(mid).remove(emitter));
+        emitter.onTimeout(() -> {
+            emitter.complete();
+            managerEmitters.get(mid).remove(emitter);
+        });
+        emitter.onError(e -> {
+            emitter.complete();
+            managerEmitters.get(mid).remove(emitter);
+        });
+        return emitter;
+    }
+
+    @Override
+    @Transactional
+    public Optional<AlarmDTO> createAlarm(AlarmRequest request) {
         Device device = deviceRepository.findByDeviceId(request.deviceId());
 
         Alarm alarm = Alarm.builder()
+                .speed(request.speed())
                 .alarmType(request.alarmType())
+                .acceleration(request.acceleration())
+                .latitude(request.latitude())
+                .longitude(request.longitude())
+                .drowsiness(request.drowsiness())
+                .rashDriving(request.rashDriving())
+                .collision(request.collision())
                 .description(request.description())
                 .alarmTime(LocalDateTime.now(ZoneId.of(AppConstants.ZONE_ID)))
                 .device(device)
@@ -77,11 +115,24 @@ public class AlarmSseEmitterServiceImpl implements AlarmSseEmitterService {
 
         // ✅ Create DTO
         String formattedString = LocalDateTime.now().format(AppConstants.CUSTOM_FORMATTER);
+        if (alarm.getAlarmImage() == null){
+            prevUrl = "Not Available";
+            downUrl = "Not Available";
+        }else{
+            prevUrl = previewUrl+alarm.getAlarmImage().getImageId();
+            downUrl = downloadUrl+alarm.getAlarmImage().getImageId();
+        }
         AlarmDTO alarmDTO = new AlarmDTO(
                 request.deviceId(),
                 alarm.getAlarmId(),
-                request.alarmType(),
-                request.description(),
+                alarm.getSpeed(),
+                alarm.getAcceleration(),
+                alarm.getLatitude(), alarm.getLongitude(), alarm.getDrowsiness(),
+                alarm.getRashDriving(), alarm.getCollision(),
+                alarm.getAlarmType(),
+                alarm.getDescription(),
+                prevUrl,
+                downUrl,
                 formattedString
         );
 
@@ -102,7 +153,6 @@ public class AlarmSseEmitterServiceImpl implements AlarmSseEmitterService {
             }
             emitters.removeAll(deadEmitters); // Clean up dead emitters
         }
-        return true;
+        return Optional.of(alarmDTO);
     }
-
 }

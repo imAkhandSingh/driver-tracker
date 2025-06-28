@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -60,13 +61,19 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public DeviceDTO toDTO(Device device) {
         String formattedDateTime = device.getInstalledAt().format(AppConstants.CUSTOM_FORMATTER);
+        Long vehicleId;
+        if (device.getVehicle() == null){
+            vehicleId = null;
+        }else{
+            vehicleId = device.getVehicle().getVehicleId();
+        }
         return DeviceDTO.builder()
                 .deviceId(device.getDeviceId())
                 .deviceName(device.getDeviceName())
                 .deviceType(device.getDeviceType())
                 .status(device.getStatus())
                 .installedAt(formattedDateTime)
-                .vehicleId(device.getVehicle().getVehicleId())
+                .vehicleId(vehicleId)
                 .build();
     }
 
@@ -81,22 +88,27 @@ public class DeviceServiceImpl implements DeviceService {
     public Optional<Device> registerDevice(DeviceRequest request, Authentication authentication) {
         String username = authentication.getName();
         Optional<Manager> manager = managerRepository.findByEmail(username);
-        Optional<Vehicle> vehicleOps = vehicleRepository.findById(request.vehicleId());
-        if (manager.isPresent() && vehicleOps.isPresent()) {
+        Optional<Vehicle> vehicleOps;
+        if (request.vehicleId() == null || request.vehicleId() == 0L){
+            vehicleOps = Optional.empty();
+        }else{
+            vehicleOps = vehicleRepository.findById(request.vehicleId());
+        }
+        if (manager.isPresent()) {
             Device device = new Device();
             device.setDeviceName(request.deviceName());
             device.setDeviceType(request.deviceType());
             device.setStatus(request.status());
             device.setInstalledAt(LocalDateTime.now(ZoneId.of(AppConstants.ZONE_ID)));
             device.setManager(manager.get());
-            Vehicle vehicle = vehicleOps.get();
-            device.setVehicle(vehicle);
+            vehicleOps.ifPresent(device::setVehicle);
             return Optional.of(deviceRepository.save(device));
         }
         return Optional.empty();
     }
 
     @Override
+    @Transactional
     public Optional<List<DeviceDTO>> getAllDevices(Authentication authentication,  int page, int size, String sortBy, String direction) {
         String username = authentication.getName();
         Optional<Manager> manager = managerRepository.findByEmail(username);
@@ -107,8 +119,6 @@ public class DeviceServiceImpl implements DeviceService {
         Pageable pageable = PageRequest.of(page, size, sort);
         List<Device> deviceList = deviceRepository.findByManager(manager.get(), pageable);
         return Optional.of(toListDTO(deviceList));
-
-//        return manager.map(value -> toListDTO(value.getDevices()));
     }
 }
 

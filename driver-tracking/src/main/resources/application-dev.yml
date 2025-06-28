@@ -3,3 +3,18 @@ spring:
     url: ${DEV_DB_URL}
     username: ${DEV_DB_USERNAME}
     password: ${DEV_DB_PASSWORD}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      leakDetectionThreshold: 20000
+      pool-name: HikariDevCP
+
+app:
+  server:
+    url: http://localhost
+
+preview-url: "${app.server.url}:${server.port}/image/${api.version}/preview/"
+download-url: "${app.server.url}:${server.port}/image/${api.version}/download/"

@@ -10,12 +10,14 @@ import com.zuree.driver_tracking.repository.ManagerRepository;
 import com.zuree.driver_tracking.service.AlarmDeviceService;
 import com.zuree.driver_tracking.util.AppConstants;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +26,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AlarmDeviceServiceImpl implements AlarmDeviceService {
 
+    @Value("${preview-url}")
+    String previewUrl;
+
+    @Value("${download-url}")
+    String downloadUrl;
+
+    String prevUrl;
+    String downUrl;
+
     private final ManagerRepository managerRepository;
     private final DeviceRepository deviceRepository;
     private final AlarmRepository alarmRepository;
@@ -31,11 +42,24 @@ public class AlarmDeviceServiceImpl implements AlarmDeviceService {
     @Override
     public AlarmDTO toDTO(Alarm alarm) {
         String formattedDateTime = alarm.getAlarmTime().format(AppConstants.CUSTOM_FORMATTER);
+        if (alarm.getAlarmImage() == null){
+            prevUrl = "Not Available";
+            downUrl = "Not Available";
+        }else{
+            prevUrl = previewUrl+alarm.getAlarmImage().getImageId();
+            downUrl = downloadUrl+alarm.getAlarmImage().getImageId();
+        }
         return new AlarmDTO(
                 alarm.getDevice().getDeviceId(),
                 alarm.getAlarmId(),
+                alarm.getSpeed(),
+                alarm.getAcceleration(),
+                alarm.getLatitude(), alarm.getLongitude(), alarm.getDrowsiness(),
+                alarm.getRashDriving(), alarm.getCollision(),
                 alarm.getAlarmType(),
                 alarm.getDescription(),
+                prevUrl,
+                downUrl,
                 formattedDateTime
         );
     }
@@ -55,6 +79,13 @@ public class AlarmDeviceServiceImpl implements AlarmDeviceService {
     }
 
     @Override
+    public AlarmDTO getAlarmById(Long id) {
+        Optional<Alarm> alarm = alarmRepository.findById(id);
+        return alarm.map(this::toDTO).orElse(null);
+    }
+
+    @Override
+    @Transactional
     public Optional<List<AlarmDTO>> getAllAlarms(Long id, int page, int size, String sortBy, String direction) {
         Device device = deviceRepository.findByDeviceId(id);
         Sort sort = direction.equalsIgnoreCase("desc") ?
@@ -67,50 +98,8 @@ public class AlarmDeviceServiceImpl implements AlarmDeviceService {
         return Optional.of(toListDTO(alarmList));
     }
 
-//    @Override
-//    public Optional<List<AlarmDTO>> getAllManagerAlarms(Authentication authentication, Long offset) {
-//        Optional<Manager> managerOps = managerRepository.findByEmail(authentication.getName());
-//        Manager manager = managerOps.get();
-//        List<Device> devices = manager.getDevices();
-//        List<List<Alarm>> alarms = new ArrayList<>();
-//        for (Device device: devices){
-//            alarms.add(device.getAlarms());
-//        }
-//
-//
-/// /        offset = offset - 1;
-/// /        if (offset >= 1) offset = offset * 20;
-//
-//        if (offset >= 0) offset = offset * 20;
-//        long limit = 20L;
-//        List<Alarm> alarmList = alarms.stream()
-//                .flatMap(List::stream)
-//                .skip(offset)
-//                .limit(limit)
-//                .sorted(Comparator.comparing(Alarm::getAlarmId).reversed())
-//                .toList();
-//
-//        return Optional.of(toListDTO(alarmList));
-//    }
-
-//    @Override
-//    public Optional<List<AlarmManagerDTO>> getAllManagerAlarms(Authentication authentication, Long offset) {
-//        Optional<Manager> managerOps = managerRepository.findByEmail(authentication.getName());
-//        Manager manager = managerOps.get();
-//        String direction = "asc";
-//        String sortBy = "alarm_id";
-//        int page = 0;
-//        int size = 20;
-//        Sort sort = direction.equalsIgnoreCase("desc") ?
-//                Sort.by(sortBy).descending() :
-//                Sort.by(sortBy).ascending();
-//
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//        List<AlarmManagerDTO> alarmsList = alarmRepository.findByManagerDevices(manager.getManagerId(), pageable);
-//        return Optional.of(alarmsList);
-//    }
-
     @Override
+    @Transactional
     public Optional<List<AlarmDTO>> getAllManagerAlarms(Authentication authentication, int page, int size, String sortBy, String direction) {
         Optional<Manager> managerOps = managerRepository.findByEmail(authentication.getName());
         Manager manager = managerOps.get();
@@ -121,5 +110,4 @@ public class AlarmDeviceServiceImpl implements AlarmDeviceService {
         Page<Alarm> alarmsList = alarmRepository.findByManagerId(manager.getManagerId(), pageable);
         return Optional.of(toPageDTO(alarmsList));
     }
-
 }

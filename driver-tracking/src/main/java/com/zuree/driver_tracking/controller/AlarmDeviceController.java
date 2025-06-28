@@ -5,6 +5,7 @@ import com.zuree.driver_tracking.dto.response.ErrorResponse;
 import com.zuree.driver_tracking.dto.response.SuccessResponse;
 import com.zuree.driver_tracking.service.AlarmDeviceService;
 import com.zuree.driver_tracking.util.AppConstants;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "*")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/alarm/${api.version}")
 public class AlarmDeviceController {
@@ -28,7 +31,7 @@ public class AlarmDeviceController {
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "deviceId") String sortBy,
+            @RequestParam(defaultValue = "alarmId") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
         Optional<List<AlarmDTO>> alarmDTO = alarmDeviceService.getAllAlarms(id, page, size, sortBy, direction);
         if (alarmDTO.isPresent()){
@@ -39,6 +42,11 @@ public class AlarmDeviceController {
                     .status(HttpStatus.NOT_FOUND)
                     .body(new ErrorResponse(AppConstants.CODE_NOT_FOUND, AppConstants.DEVICE_NOT_FOUND));
         }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getAlarmById(@PathVariable Long id) {
+        return ResponseEntity.ok(new SuccessResponse<>(alarmDeviceService.getAlarmById(id)));
     }
 
     @GetMapping("/manager/all")

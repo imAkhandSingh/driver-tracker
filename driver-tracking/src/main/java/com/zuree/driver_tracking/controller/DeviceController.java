@@ -8,6 +8,7 @@ import com.zuree.driver_tracking.dto.response.SuccessResponse;
 import com.zuree.driver_tracking.model.Device;
 import com.zuree.driver_tracking.service.DeviceService;
 import com.zuree.driver_tracking.util.AppConstants;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin(origins = "*")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/device/${api.version}")
 public class DeviceController {
